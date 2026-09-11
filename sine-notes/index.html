@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Documentation-style notes rendered from structured content objects.">
+  <title>Sine Notes</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script defer src="content.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__main">
+      <div class="brand"><span class="brand__mark"></span><span id="brand-name">Notes</span></div>
+      <div class="status">Estado: <strong id="status-label">Connected</strong></div>
+    </div>
+    <nav class="tabs" aria-label="Primary navigation">
+      <span class="tab">Developer</span>
+      <span class="tab">Reference</span>
+      <span class="tab tab--active">Documentation</span>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <label class="search"><span>⌕</span><input id="search" type="search" placeholder="Search…"></label>
+      <div class="sidebar__title">Overview</div>
+      <nav id="section-nav" class="section-nav" aria-label="Document sections"></nav>
+    </aside>
+
+    <main id="main-content" class="document"></main>
+  </div>
+</body>
+</html>

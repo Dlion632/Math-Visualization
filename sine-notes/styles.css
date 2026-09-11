@@ -1,0 +1,114 @@
+
+:root {
+  color-scheme: dark;
+  --bg: #111219;
+  --surface: #171922;
+  --surface-2: #1b1e28;
+  --line: #292d39;
+  --text: #f4f5f7;
+  --body: #b7bec9;
+  --muted: #858e9d;
+  --teal: #1fc5b6;
+  --red: #ef6a72;
+  --red-soft: rgba(239, 106, 114, .11);
+  --max: 1480px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at 80% 0, rgba(31,197,182,.045), transparent 32rem), var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.65;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(17,18,25,.94);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+.topbar__main, .tabs {
+  max-width: var(--max);
+  margin: auto;
+  padding-inline: 22px;
+}
+.topbar__main {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.brand__mark { width: 19px; height: 19px; border: 2px solid var(--teal); border-radius: 5px 5px 9px 5px; box-shadow: inset 0 0 0 3px rgba(31,197,182,.08); }
+.status { color: var(--muted); font-size: 14px; }
+.status strong { color: #32d583; }
+.tabs { display: flex; gap: 30px; }
+.tab { position: relative; padding: 16px 0 13px; color: var(--muted); font-size: 14px; }
+.tab--active { color: var(--teal); }
+.tab--active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--teal); }
+
+.layout {
+  max-width: var(--max);
+  margin: auto;
+  padding: 34px 22px 60px;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 38px;
+}
+.sidebar { position: sticky; top: 126px; align-self: start; max-height: calc(100vh - 150px); overflow: auto; padding-right: 8px; }
+.search { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #414653; padding-bottom: 10px; color: var(--muted); }
+.search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; }
+.sidebar__title { margin: 30px 0 10px; font-size: 14px; font-weight: 750; }
+.section-nav a { display: block; padding: 7px 0; color: var(--body); text-decoration: none; font-size: 14px; }
+.section-nav a:hover, .section-nav a.is-active { color: var(--teal); }
+
+.document { min-width: 0; }
+.document__title { margin: 0 0 34px; font-size: clamp(34px, 5vw, 48px); line-height: 1.05; }
+.document__eyebrow { margin-bottom: 26px; font-weight: 800; letter-spacing: .09em; font-size: 14px; }
+.section { padding: 8px 0 26px; scroll-margin-top: 130px; }
+.section + .section { margin-top: 20px; border-top: 1px solid rgba(255,255,255,.045); padding-top: 34px; }
+h2 { margin: 0 0 24px; font-size: 28px; line-height: 1.22; letter-spacing: -.012em; }
+p { max-width: 80ch; margin: 0 0 18px; color: var(--body); font-size: 17px; }
+ul { max-width: 80ch; margin: 0 0 20px; padding-left: 22px; color: var(--body); }
+li { margin-bottom: 7px; }
+.quote { max-width: 80ch; margin: 14px 0 22px; padding: 12px 18px; border-left: 3px solid var(--teal); background: rgba(31,197,182,.055); border-radius: 0 10px 10px 0; }
+.quote p { margin: 0; color: var(--text); }
+
+.text-accent, strong.text-accent { color: var(--red); font-weight: 650; }
+.math-inline { color: var(--text); white-space: nowrap; }
+.equation {
+  margin: 14px 0 20px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.equation--important {
+  color: var(--red);
+  border-color: rgba(239,106,114,.45);
+  background: linear-gradient(90deg, var(--red-soft), transparent 60%), var(--surface-2);
+}
+.empty-state { color: var(--muted); padding: 30px 0; }
+
+@media (max-width: 980px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; max-height: none; }
+}
+@media (max-width: 640px) {
+  .topbar__main, .tabs, .layout { padding-inline: 15px; }
+  .tabs { gap: 18px; overflow-x: auto; }
+  h2 { font-size: 23px; }
+  p { font-size: 16px; }
+  .equation { padding: 14px 10px; }
+}
+@media print {
+  :root { color-scheme: light; --bg: white; --text: black; --body: #222; --surface-2: #f7f7f7; --line: #ddd; }
+  .topbar, .sidebar { display: none; }
+  .layout { display: block; padding: 0; }
+}
