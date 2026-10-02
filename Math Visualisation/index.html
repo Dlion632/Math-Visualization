@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Vector App</title>
+    <title>Math Visualisation</title>
     <link rel="stylesheet" href="style.css">
     <script defer src="main.js"></script>
 </head>
@@ -16,7 +16,39 @@
         </div>
 
         <div id="data-block">
-            <h1>Vector Analysis</h1>
+            <h1 id="project-title">Coordinate System</h1>
+
+            <label class="control-label" for="project-select">Project</label>
+            <select id="project-select" class="control-input">
+                <option value="coordinates">Coordinate System</option>
+                <option value="tiny-steps">Sine — Tiny Steps</option>
+            </select>
+
+            <div id="coordinate-controls" class="project-controls">
+                <p class="help-text">Drag the point. Drag empty space to pan. Scroll to zoom.</p>
+            </div>
+
+            <div id="tiny-step-controls" class="project-controls" hidden>
+                <label class="control-label" for="theta-input">Radian input θ</label>
+                <input id="theta-input" class="control-input" type="number" step="0.1" value="1">
+
+                <label class="control-label" for="steps-input">Tiny steps</label>
+                <input id="steps-input" class="control-input" type="number" min="1" step="1" value="20">
+
+                <div class="button-row">
+                    <button id="reset-steps" type="button">Reset</button>
+                    <button id="next-step" type="button">Next step</button>
+                    <button id="run-steps" type="button">Run</button>
+                </div>
+
+                <div class="readout">
+                    <p>Step <span id="step-value">0 / 20</span></p>
+                    <p>h <span id="h-value">0.05000</span></p>
+                    <p>(x, y) <span id="point-value">(1.00000, 0.00000)</span></p>
+                    <p>x² + y² <span id="length-value">1.00000</span></p>
+                    <p>Squared-length error <span id="error-value">0.00000</span></p>
+                </div>
+            </div>
         </div>
 
     </div>
