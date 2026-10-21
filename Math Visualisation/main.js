@@ -9,7 +9,13 @@ const VectorApp = {
         vectorColor: "#4cc9f0",
         axisColor: "#4cc9f0",
         gridColor: "#334155",
-        labelColor: "#cbd5e1"
+        labelColor: "#cbd5e1",
+
+        // Tiny Steps: the math uses a circle of radius 1;
+        // on screen, 1 unit is drawn as 200 world units (4 grid cells)
+        unitRadius: 200,
+        circleColor: "#64748b",
+        heightColor: "#facc15"
     },
 
     // Holds dynamic values that change during execution
@@ -22,7 +28,21 @@ const VectorApp = {
 
         cssWidth: 0,
         cssHeight: 0,
-        dpr: 1
+        dpr: 1,
+
+        project: "coordinates",
+
+        // Tiny Steps state, in unit-circle (math) coordinates
+        tiny: {
+            theta: 1,
+            steps: 20,
+            h: 0.05,
+            step: 0,
+            x: 1,
+            y: 0,
+            path: [{ x: 1, y: 0 }],
+            timer: null
+        }
     },
 
     elements: {
@@ -45,8 +65,109 @@ const VectorApp = {
     init() {
         this.setupElementsHandles();
         this.attachEvents();
-        this.setupCanvas();                 
-        this.draw();                 
+        this.setupCanvas();
+        this.setupProjectControls();
+        this.draw();
+    },
+
+    setupProjectControls() {
+        const select = document.getElementById("project-select");
+        const thetaInput = document.getElementById("theta-input");
+        const stepsInput = document.getElementById("steps-input");
+
+        const applyProject = () => {
+            this.stopTinyRun();
+            this.state.project = select.value;
+            document.getElementById("coordinate-controls").hidden = select.value !== "coordinates";
+            document.getElementById("tiny-step-controls").hidden = select.value !== "tiny-steps";
+            this.elements.heading.textContent = select.options[select.selectedIndex].text;
+            this.draw();
+        };
+
+        select.addEventListener("change", applyProject);
+        thetaInput.addEventListener("input", () => this.resetTinySteps());
+        stepsInput.addEventListener("input", () => this.resetTinySteps());
+
+        document.getElementById("reset-steps").addEventListener("click", () => this.resetTinySteps());
+        document.getElementById("next-step").addEventListener("click", () => {
+            this.stopTinyRun();
+            this.takeTinyStep();
+            this.updateTinyReadout();
+            this.draw();
+        });
+        document.getElementById("run-steps").addEventListener("click", () => this.runTinySteps());
+
+        this.resetTinySteps();
+        applyProject();
+    },
+
+    // Start again at (1, 0): zero radians of travel
+    resetTinySteps() {
+        this.stopTinyRun();
+        const t = this.state.tiny;
+
+        t.theta = Number(document.getElementById("theta-input").value) || 0;
+        t.steps = Math.max(1, Math.floor(Number(document.getElementById("steps-input").value) || 1));
+
+        // split θ into equal tiny pieces of travel
+        t.h = t.theta / t.steps;
+
+        t.step = 0;
+        t.x = 1;
+        t.y = 0;
+        t.path = [{ x: 1, y: 0 }];
+
+        this.updateTinyReadout();
+        this.draw();
+    },
+
+    // One tiny straight movement: R_new = R + h·V, with V = (−y, x)
+    takeTinyStep() {
+        const t = this.state.tiny;
+        if (t.step >= t.steps) return;
+
+        // perpendicular direction, computed from the CURRENT point
+        // (both new coordinates must use the old x and y)
+        const vx = -t.y;
+        const vy = t.x;
+
+        t.x = t.x + t.h * vx;   // x_new = x − h·y
+        t.y = t.y + t.h * vy;   // y_new = y + h·x
+
+        t.step += 1;
+        t.path.push({ x: t.x, y: t.y });
+    },
+
+    // Play the remaining steps, about 3 seconds in total
+    runTinySteps() {
+        const t = this.state.tiny;
+        if (t.timer !== null || t.step >= t.steps) return;
+
+        const stepsPerTick = Math.max(1, Math.ceil(t.steps / 180));
+        const delay = Math.max(16, 3000 / t.steps);
+
+        t.timer = setInterval(() => {
+            for (let i = 0; i < stepsPerTick; i++) this.takeTinyStep();
+            this.updateTinyReadout();
+            this.draw();
+            if (t.step >= t.steps) this.stopTinyRun();
+        }, delay);
+    },
+
+    stopTinyRun() {
+        clearInterval(this.state.tiny.timer);
+        this.state.tiny.timer = null;
+    },
+
+    updateTinyReadout() {
+        const t = this.state.tiny;
+        const squaredLength = t.x * t.x + t.y * t.y;
+
+        document.getElementById("step-value").textContent = `${t.step} / ${t.steps}`;
+        document.getElementById("h-value").textContent = t.h.toFixed(5);
+        document.getElementById("point-value").textContent = `(${t.x.toFixed(5)}, ${t.y.toFixed(5)})`;
+        document.getElementById("length-value").textContent = squaredLength.toFixed(5);
+        document.getElementById("error-value").textContent = (squaredLength - 1).toFixed(5);
     },
 
     worldToScreen(worldPoint) {
@@ -108,9 +229,78 @@ const VectorApp = {
     draw() {
         this.clear();
         this.drawGridAndAxes();
-        this.drawVector({ x: 0, y: 0 }, this.state.point);
-        this.drawPoint(this.state.point);
+        if (this.state.project === "tiny-steps") {
+            this.drawTinySteps();
+        } else {
+            this.drawVector({ x: 0, y: 0 }, this.state.point);
+            this.drawPoint(this.state.point);
+        }
         this.drawLabels();
+    },
+
+    drawTinySteps() {
+        const ctx = this.elements.ctx;
+        const t = this.state.tiny;
+        const r = this.config.unitRadius;
+
+        // unit-circle coordinates → world coordinates
+        const toWorld = (p) => ({ x: p.x * r, y: p.y * r });
+
+        // reference circle x² + y² = 1 (only for comparison, not used in the steps)
+        const center = this.worldToScreen({ x: 0, y: 0 });
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, r * this.viewport.scale, 0, Math.PI * 2);
+        ctx.strokeStyle = this.config.circleColor;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // the straight tiny steps taken so far
+        ctx.beginPath();
+        t.path.forEach((p, i) => {
+            const s = this.worldToScreen(toWorld(p));
+            if (i === 0) ctx.moveTo(s.x, s.y);
+            else ctx.lineTo(s.x, s.y);
+        });
+        ctx.strokeStyle = this.config.pointColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // where each step ended
+        if (t.steps <= 200) {
+            ctx.fillStyle = this.config.pointColor;
+            t.path.forEach((p) => {
+                const s = this.worldToScreen(toWorld(p));
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        const current = toWorld({ x: t.x, y: t.y });
+
+        // the vertical coordinate y: drop from the point to the x-axis
+        const top = this.worldToScreen(current);
+        const foot = this.worldToScreen({ x: current.x, y: 0 });
+        ctx.save();
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(top.x, top.y);
+        ctx.lineTo(foot.x, foot.y);
+        ctx.strokeStyle = this.config.heightColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+
+        // radius R = (x, y)
+        this.drawVector({ x: 0, y: 0 }, current);
+
+        // next direction V = (−y, x), drawn from the point at full length
+        if (t.step < t.steps) {
+            const tip = toWorld({ x: t.x - t.y, y: t.y + t.x });
+            this.drawVector(current, tip, "#ff6b6b80");
+        }
+
+        this.drawPoint(current);
     },
 
     drawGridAndAxes() {
@@ -313,7 +503,7 @@ const VectorApp = {
             const dx = (world.x - this.state.point.x) * this.viewport.scale;
             const dy = (world.y - this.state.point.y) * this.viewport.scale;
             const distCss = Math.hypot(dx, dy);
-            if (distCss <= this.config.pointSize * 1.5) {
+            if (this.state.project === "coordinates" && distCss <= this.config.pointSize * 1.5) {
                 this.state.draggingPoint = true;
             } else {
                 this.state.draggingPan = true;
