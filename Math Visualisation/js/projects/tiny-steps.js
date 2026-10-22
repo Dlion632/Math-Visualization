@@ -2,7 +2,8 @@
 
 // tiny-steps.js — the "Sine — Tiny Steps" project.
 //
-// It connects the math to the screen in three stages:
+// Follows the lifecycle in project-template.js, and connects
+// the math to the screen in three stages:
 //   1. math:   tiny-steps-math.js moves a point in unit-circle coordinates
 //   2. world:  toWorld() makes the circle 200 world units big (4 grid cells)
 //   3. screen: the pens turn world coordinates into pixels
@@ -10,12 +11,10 @@
 import { drawCircle, drawLine, drawPath, drawPoint, drawVector } from "../core/pens.js";
 import { stepSize, perpendicular, tinyStep, squaredLength } from "./tiny-steps-math.js";
 
-// 1 math unit = 200 world units, so the circle is large enough to see
-const UNIT = 200;
+// ── 1. State ──────────────────────────────────────────────────
 
-function toWorld(p) {
-    return { x: p.x * UNIT, y: p.y * UNIT };
-}
+const UNIT = 200;           // 1 math unit = 200 world units
+const RUN_SECONDS = 3;      // Run plays all the steps in about this long
 
 const colors = {
     circle: "#64748b",
@@ -31,24 +30,31 @@ const state = {
     step: 0,                    // how many steps taken so far
     point: { x: 1, y: 0 },      // current point, unit-circle coordinates
     path: [{ x: 1, y: 0 }],     // every point visited
-    timer: null
+    running: false,             // is Run playing?
+    clock: 0                    // seconds collected towards the next step
 };
 
-let redraw = () => {};
+// ── 2. Helpers ────────────────────────────────────────────────
+
+function toWorld(p) {
+    return { x: p.x * UNIT, y: p.y * UNIT };
+}
+
+function input(id) {
+    return document.getElementById(id);
+}
 
 // Start again at (1, 0): zero radians of travel.
 function reset() {
-    stop();
-    state.theta = Number(document.getElementById("theta-input").value) || 0;
-    state.steps = Math.max(1, Math.floor(Number(document.getElementById("steps-input").value) || 1));
+    state.theta = Number(input("theta-input").value) || 0;
+    state.steps = Math.max(1, Math.floor(Number(input("steps-input").value) || 1));
     state.h = stepSize(state.theta, state.steps);
 
     state.step = 0;
     state.point = { x: 1, y: 0 };
     state.path = [state.point];
-
-    updateReadout();
-    redraw();
+    state.running = false;
+    state.clock = 0;
 }
 
 function takeStep() {
@@ -58,56 +64,53 @@ function takeStep() {
     state.step += 1;
 }
 
-// Play the remaining steps in about 3 seconds.
-function run() {
-    if (state.timer !== null || state.step >= state.steps) return;
-
-    const stepsPerTick = Math.max(1, Math.ceil(state.steps / 180));
-    const delay = Math.max(16, 3000 / state.steps);
-
-    state.timer = setInterval(() => {
-        for (let i = 0; i < stepsPerTick; i++) takeStep();
-        updateReadout();
-        redraw();
-        if (state.step >= state.steps) stop();
-    }, delay);
-}
-
-function stop() {
-    clearInterval(state.timer);
-    state.timer = null;
-}
-
-function updateReadout() {
+function showReadout() {
     const p = state.point;
     const len2 = squaredLength(p);
 
-    document.getElementById("step-value").textContent = `${state.step} / ${state.steps}`;
-    document.getElementById("h-value").textContent = state.h.toFixed(5);
-    document.getElementById("point-value").textContent = `(${p.x.toFixed(5)}, ${p.y.toFixed(5)})`;
-    document.getElementById("length-value").textContent = len2.toFixed(5);
-    document.getElementById("error-value").textContent = (len2 - 1).toFixed(5);
+    input("step-value").textContent = `${state.step} / ${state.steps}`;
+    input("h-value").textContent = state.h.toFixed(5);
+    input("point-value").textContent = `(${p.x.toFixed(5)}, ${p.y.toFixed(5)})`;
+    input("length-value").textContent = len2.toFixed(5);
+    input("error-value").textContent = (len2 - 1).toFixed(5);
 }
 
+// ── 3. Lifecycle ──────────────────────────────────────────────
+
 export const tinyStepsProject = {
-    setup(redrawFunction) {
-        redraw = redrawFunction;
+    panel: "tiny-step-controls",
 
-        document.getElementById("theta-input").addEventListener("input", reset);
-        document.getElementById("steps-input").addEventListener("input", reset);
-        document.getElementById("reset-steps").addEventListener("click", reset);
-        document.getElementById("next-step").addEventListener("click", () => {
-            stop();
+    setup() {
+        // buttons only change the state; the next frame shows it
+        input("theta-input").addEventListener("input", reset);
+        input("steps-input").addEventListener("input", reset);
+        input("reset-steps").addEventListener("click", reset);
+        input("next-step").addEventListener("click", () => {
+            state.running = false;
             takeStep();
-            updateReadout();
-            redraw();
         });
-        document.getElementById("run-steps").addEventListener("click", run);
-
+        input("run-steps").addEventListener("click", () => {
+            state.running = true;
+        });
         reset();
     },
 
-    stop,
+    enter() {
+        // the state is kept from the last visit
+    },
+
+    update(dt) {
+        if (!state.running) return;
+
+        // collect time, and take one step for every (RUN_SECONDS ÷ steps) seconds
+        const secondsPerStep = RUN_SECONDS / state.steps;
+        state.clock += dt;
+        while (state.clock >= secondsPerStep && state.step < state.steps) {
+            takeStep();
+            state.clock -= secondsPerStep;
+        }
+        if (state.step >= state.steps) state.running = false;
+    },
 
     draw() {
         const origin = { x: 0, y: 0 };
@@ -135,5 +138,18 @@ export const tinyStepsProject = {
         }
 
         drawPoint(current);
+
+        showReadout();
+    },
+
+    leave() {
+        state.running = false;
+    },
+
+    grab(world) {
+        return false;   // nothing to drag; dragging pans the view
+    },
+
+    drag(world) {
     }
 };

@@ -196,7 +196,45 @@
     .figure { flex: none; width: 400px; }
     .figure h3 { margin: 0 0 4px; font-size: 19px; color: #4a2380; text-align: center; }
 
-    /* 4. layers of a redraw */
+    /* 4. lifecycle */
+    .moments { display: flex; gap: 12px; margin: 6px 0 4px; }
+    .moment {
+        flex: 1;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px 12px;
+        background: #fffdf8;
+    }
+    .moment.wide { flex: 1.3; }
+    .moment h3 { margin: 0; font-size: 19px; color: var(--ink); }
+    .moment .caller { font-size: 15px; color: #50606f; margin: 2px 0 8px; }
+    .moment .chips { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; color: #b39a6a; }
+    .moment .job { font-size: 16px; line-height: 1.35; margin-top: 8px; }
+    .chip {
+        font-family: Consolas, "DejaVu Sans Mono", monospace;
+        font-size: 15px;
+        font-weight: bold;
+        color: #6b4a0c;
+        background: #fbefd9;
+        border: 1px solid #e3c98f;
+        border-radius: 5px;
+        padding: 2px 7px;
+    }
+    .frame-title { margin: 18px 0 10px; font-size: 20px; color: #6b4a0c; }
+    .update-box {
+        width: 170px;
+        border: 1px solid #e3c98f;
+        background: #fbefd9;
+        border-radius: 8px;
+        padding: 14px 10px;
+        text-align: center;
+        font-size: 16px;
+        line-height: 1.35;
+        margin-top: 8px;
+    }
+    .update-box .fn { font-family: Consolas, "DejaVu Sans Mono", monospace; font-size: 15px; color: #6b4a0c; font-weight: bold; margin-bottom: 4px; }
+    .thumb.small { width: 178px; }
+
     .thumbs { display: flex; align-items: flex-start; }
     .thumb { width: 214px; text-align: center; font-size: 16px; line-height: 1.3; }
     .thumb svg { display: block; margin: 0 auto 6px; border-radius: 4px; }
@@ -310,14 +348,14 @@
         <div class="panel-head"><div class="badge">2</div><h2>Two layers: the paper and the drawings</h2></div>
         <div class="panel-body">
             <div class="main-row">
-                <span class="file">js/main.js</span>&nbsp; starts everything, chooses the current project, and redraws
+                <span class="file">js/main.js</span>&nbsp; runs the lifecycle: the only file that calls the projects and draws each frame
             </div>
             <div class="layers">
                 <div class="layer">
                     <h3><span class="file">core/</span> the coordinate system</h3>
                     <div class="sub">the paper: knows nothing about any project</div>
                     <table>
-                        <tr><td><span class="file">view.js</span></td><td>the camera: world ↔ pixels, pan and zoom numbers; draws nothing</td></tr>
+                        <tr><td><span class="file">view.js</span></td><td>the camera: converts between world units and pixels, keeps the pan and zoom numbers; draws nothing</td></tr>
                         <tr><td><span class="file">grid.js</span></td><td>grid lines, axes and their numbers</td></tr>
                         <tr><td><span class="file">pens.js</span></td><td>drawing tools that take world coordinates</td></tr>
                         <tr><td><span class="file">input.js</span></td><td>the mouse: pan, zoom, drag</td></tr>
@@ -330,11 +368,12 @@
                 </div>
                 <div class="layer">
                     <h3><span class="file">projects/</span> what is drawn on it</h3>
-                    <div class="sub">each one draws only with the pens</div>
+                    <div class="sub">each one has the same eight parts and draws only with the pens</div>
                     <table>
                         <tr><td><span class="file">coordinates.js</span></td><td>a draggable point and its vector</td></tr>
                         <tr><td><span class="file">tiny-steps.js</span></td><td>Sine — Tiny Steps: buttons, state, drawing</td></tr>
                         <tr><td><span class="file">tiny-steps-math.js</span></td><td>the tiny-step rule: numbers only, no <span class="file">Math.sin</span></td></tr>
+                        <tr><td><span class="file">project-template.js</span></td><td>the starting point for a new project</td></tr>
                     </table>
                 </div>
             </div>
@@ -405,19 +444,53 @@
 
     <!-- 4 -->
     <section class="panel amber">
-        <div class="panel-head"><div class="badge">4</div><h2>Every redraw paints four layers, bottom to top</h2></div>
+        <div class="panel-head"><div class="badge">4</div><h2>The lifecycle: who calls what, and when</h2></div>
         <div class="panel-body">
+            <p>Every project has the same eight parts. Only <span class="file">main.js</span> and <span class="file">input.js</span> call them, always at the same moments:</p>
+            <div class="moments">
+                <div class="moment">
+                    <h3>Page loads</h3>
+                    <div class="caller">called by <span class="file">main.js</span></div>
+                    <div class="chips"><span class="chip">setup()</span></div>
+                    <div class="job">every project, once: connect its buttons</div>
+                </div>
+                <div class="moment">
+                    <h3>Menu choice</h3>
+                    <div class="caller">called by <span class="file">main.js</span></div>
+                    <div class="chips"><span class="chip">leave()</span> <svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> <span class="chip">enter()</span></div>
+                    <div class="job">the old project pauses, the new one starts; <span class="file">panel</span> says which controls to show</div>
+                </div>
+                <div class="moment">
+                    <h3>Every frame</h3>
+                    <div class="caller">called by <span class="file">main.js</span></div>
+                    <div class="chips"><span class="chip">update(dt)</span> <svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> <span class="chip">draw()</span></div>
+                    <div class="job">about 60 times a second: first change the state, then show it</div>
+                </div>
+                <div class="moment wide">
+                    <h3>Mouse</h3>
+                    <div class="caller">called by <span class="file">input.js</span></div>
+                    <div class="chips"><span class="chip">grab(world)</span> <svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> <span class="chip">drag(world)</span></div>
+                    <div class="job">take the drag, or return false and the view pans</div>
+                </div>
+            </div>
+
+            <h3 class="frame-title">One frame in detail</h3>
             <div class="thumbs">
-                <div class="thumb"><svg id="layer-1"></svg><div class="fn">clearCanvas()</div>an empty canvas<br><span class="file">view.js</span></div>
+                <div class="update-box">
+                    <div class="fn">update(dt)</div>
+                    change the state<br><span class="muted small">e.g. Run takes the steps that are due</span>
+                </div>
                 <div class="thumb-arrow"><svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                <div class="thumb"><svg id="layer-2"></svg><div class="fn">drawGrid()</div>grid and axes<br><span class="file">grid.js</span></div>
+                <div class="thumb small"><svg id="layer-1"></svg><div class="fn">clearCanvas()</div>empty canvas<br><span class="file">view.js</span></div>
                 <div class="thumb-arrow"><svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                <div class="thumb"><svg id="layer-3"></svg><div class="fn">project.draw()</div>the current project<br><span class="file">projects/</span></div>
+                <div class="thumb small"><svg id="layer-2"></svg><div class="fn">drawGrid()</div>grid and axes<br><span class="file">grid.js</span></div>
                 <div class="thumb-arrow"><svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                <div class="thumb"><svg id="layer-4"></svg><div class="fn">drawGridLabels()</div>numbers on top<br><span class="file">grid.js</span></div>
+                <div class="thumb small"><svg id="layer-3"></svg><div class="fn">draw()</div>the project<br><span class="file">projects/</span></div>
+                <div class="thumb-arrow"><svg width="26" height="14" viewBox="0 0 26 14"><path d="M1 7H23M17 2l6 5-6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="thumb small"><svg id="layer-4"></svg><div class="fn">drawGridLabels()</div>numbers on top<br><span class="file">grid.js</span></div>
             </div>
             <p class="muted small" style="margin-top: 12px; text-align: center;">
-                <span class="file">redraw()</span> in <span class="file">main.js</span> runs these four after every change. The numbers go last, so a drawing never covers them.
+                A project never calls its own parts, never redraws, and never starts a timer. Movement over time belongs in <span class="file">update(dt)</span>.
             </p>
         </div>
     </section>
@@ -453,21 +526,24 @@
         <div class="panel-body">
             <div class="recipe">
                 <div class="card">
-                    <h3><span class="n">1</span>Write it</h3>
-                    <span class="file">js/projects/name.js</span> with a <span class="file">draw()</span>,
-                    plus <span class="file">name-math.js</span> if it has a rule to compute.
+                    <h3><span class="n">1</span>Copy the template</h3>
+                    Copy <span class="file">project-template.js</span> to <span class="file">js/projects/name.js</span>,
+                    then fill in its eight parts. Add <span class="file">name-math.js</span> if it has a rule to compute.
                 </div>
                 <div class="card">
                     <h3><span class="n">2</span>Give it controls</h3>
-                    In <span class="file">index.html</span>: an <span class="file">&lt;option&gt;</span> in the project menu
-                    and a <span class="file">&lt;div&gt;</span> for its buttons.
+                    In <span class="file">index.html</span>: an <span class="file">&lt;option value="name"&gt;</span> in the menu
+                    and a <span class="file">&lt;div&gt;</span> whose id matches <span class="file">panel</span>.
                 </div>
                 <div class="card">
                     <h3><span class="n">3</span>Register it</h3>
-                    In <span class="file">main.js</span>: add it to the <span class="file">projects</span>
-                    and <span class="file">panels</span> lists.
+                    In <span class="file">main.js</span>: import it and add one line to the <span class="file">projects</span> list.
                 </div>
             </div>
+            <p class="muted small" style="margin: 12px 0 0; text-align: center;">
+                If a part is missing, the page stops with a message naming it, for example:
+                <span class="file">Project "name" is missing: leave.</span>
+            </p>
         </div>
     </section>
 
@@ -554,10 +630,10 @@ function miniCanvas(svg, opts) {
 }
 
 const overshoot = { theta: 1.5, steps: 4 };
-miniCanvas(document.getElementById("layer-1"), { width: 200 });
-miniCanvas(document.getElementById("layer-2"), { width: 200, grid: true });
-miniCanvas(document.getElementById("layer-3"), { width: 200, grid: true, project: overshoot });
-miniCanvas(document.getElementById("layer-4"), { width: 200, grid: true, project: overshoot, labels: true });
+miniCanvas(document.getElementById("layer-1"), { width: 168 });
+miniCanvas(document.getElementById("layer-2"), { width: 168, grid: true });
+miniCanvas(document.getElementById("layer-3"), { width: 168, grid: true, project: overshoot });
+miniCanvas(document.getElementById("layer-4"), { width: 168, grid: true, project: overshoot, labels: true });
 
 const firstStep = { theta: 0.05, steps: 1 };
 miniCanvas(document.getElementById("pan-before"), { width: 200, grid: true, project: firstStep, labels: true, highlight: true });

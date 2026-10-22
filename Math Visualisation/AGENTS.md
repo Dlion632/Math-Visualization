@@ -23,7 +23,7 @@ mathematical idea → tiny calculation → world coordinates → rendered moveme
 
 ```
 js/
-  main.js                 starts everything, switches projects, redraws
+  main.js                 runs the lifecycle: the only place that calls the projects and draws
   core/                   the coordinate system itself, knows nothing about any project
     view.js               world ↔ screen conversion, pan/zoom numbers, canvas size (draws nothing)
     grid.js               draws the grid, axes and numbers
@@ -33,6 +33,7 @@ js/
     coordinates.js        draggable point
     tiny-steps.js         Sine — Tiny Steps: state, buttons, drawing
     tiny-steps-math.js    the tiny-step rule: plain numbers only
+    project-template.js   the starting point for a new project (not loaded)
 ```
 
 Rules:
@@ -42,15 +43,34 @@ Rules:
 - Math lives in its own `*-math.js` file: unit-circle numbers, no canvas, no world units, no `Math.sin` or `Math.cos`.
 - The page uses ES modules, so it must be opened through a local server (for example `npx serve`), not by double-clicking `index.html`.
 
-A project is an object with:
+## The project lifecycle
 
-- `draw()` — required, draws the project
-- `setup(redraw)` — optional, wires its controls and keeps `redraw` to call after changes
-- `stop()` — optional, stops animations when another project is selected
-- `grab(world)` and `drag(world)` — optional, make something draggable
+Every project has the same eight parts, in the same order, even when some are empty.
+`js/projects/project-template.js` is the starting point for a new project.
+
+| Part | Called by | When | Job |
+|---|---|---|---|
+| `panel` | `main.js` | menu choice | id of the project's controls `<div>` in `index.html` |
+| `setup()` | `main.js` | page loads, once | connect buttons and inputs |
+| `enter()` | `main.js` | the project is chosen | prepare, if needed |
+| `update(dt)` | `main.js` | every frame | change the state (`dt` = seconds since the last frame) |
+| `draw()` | `main.js` | every frame, after `update` | show the state with the pens |
+| `leave()` | `main.js` | another project is chosen | pause what is running |
+| `grab(world)` | `input.js` | mouse pressed | return `true` to take the drag, `false` to pan |
+| `drag(world)` | `input.js` | mouse moved while grabbed | move the grabbed thing |
+
+Each frame `main.js` runs: `update(dt)` → clear → grid → `draw()` → grid numbers.
+
+Lifecycle rules:
+
+- Only `main.js` and `input.js` call lifecycle functions. A project never calls its own.
+- A project never redraws, and never uses `setInterval`, `setTimeout` or `requestAnimationFrame`. Movement over time goes in `update(dt)`.
+- Buttons and `update(dt)` change the state. `draw()` only shows it.
+- Each project file has three sections, in this order: `1. State`, `2. Helpers`, `3. Lifecycle`.
+- `main.js` checks every project when the page loads and stops with a message naming any missing part.
 
 Adding a project:
 
-1. Create its file in `js/projects/` (and a `*-math.js` file if it has math).
-2. Add an `<option>` to `#project-select` and a controls `<div>` in `index.html`.
-3. Register it in the `projects` and `panels` lists in `main.js`.
+1. Copy `js/projects/project-template.js` to `js/projects/name.js` and fill in the parts (add `name-math.js` if it has a rule to compute).
+2. In `index.html`, add an `<option value="name">` to `#project-select` and a controls `<div>` whose id matches `panel`.
+3. In `main.js`, import it and add one line to the `projects` list.

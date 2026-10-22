@@ -6,13 +6,15 @@
 //   scroll                    → zoom around the cursor
 //   drag something grabbable  → the current project moves it
 //
-// A project makes something grabbable by having two functions:
-//   grab(worldPoint)  → return true if it wants this drag
-//   drag(worldPoint)  → move the grabbed thing there
+// It calls two of the project's lifecycle functions:
+//   grab(world)  → the project returns true if it wants this drag
+//   drag(world)  → the project moves the grabbed thing there
+//
+// Nothing is drawn here: the next frame in main.js shows the change.
 
 import { view, screenToWorld, clientToWorld } from "./view.js";
 
-export function setupInput(getProject, redraw) {
+export function setupInput(getProject) {
     const canvas = view.canvas;
     canvas.style.touchAction = "none";
 
@@ -28,7 +30,7 @@ export function setupInput(getProject, redraw) {
         const project = getProject();
         const world = clientToWorld(ev.clientX, ev.clientY);
 
-        if (project.grab && project.grab(world)) {
+        if (project.grab(world)) {
             dragging = "project";
         } else {
             dragging = "pan";
@@ -50,7 +52,6 @@ export function setupInput(getProject, redraw) {
             view.center.x -= dxClient / view.scale;
             view.center.y += dyClient / view.scale;
         }
-        redraw();
     });
 
     const stopDragging = () => {
@@ -88,7 +89,5 @@ export function setupInput(getProject, redraw) {
         // shift the center by the difference, so the cursor point is back in place
         view.center.x += before.x - after.x;
         view.center.y += before.y - after.y;
-
-        redraw();
     }, { passive: false });
 }
