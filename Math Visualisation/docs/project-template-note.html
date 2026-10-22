@@ -8,22 +8,19 @@
     :root {
         --bg: #0d141d;
         --line: #26364a;
-        --box: #16212e;
-        --box-line: #33475e;
         --text: #e8eef5;
         --soft: #cfd9e4;
         --muted: #8fa2b8;
         --leader: #7f91a7;
 
-        /* one colour per moment, used on the boxes and labels only */
-        --load: #a3b3c6;
-        --menu: #b49cff;
-        --frame: #3fd6c2;
-        --mouse: #ff9f5a;
+        /* the three jobs a line of project code can have */
+        --remember: #8db4ff;
+        --change: #ffb454;
+        --show: #3fd6c2;
+        --value: #a3b3c6;
     }
 
     * { box-sizing: border-box; }
-
     body { margin: 0; background: #05080c; }
 
     .page {
@@ -34,12 +31,9 @@
         color: var(--text);
         font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", sans-serif;
     }
-
     code, .mono { font-family: "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace; }
     code { font-size: 0.88em; color: #fff; white-space: nowrap; }
-    .rules-left { margin-top: 34px; padding-left: 128px; }
 
-    /* ── header ── */
     .top {
         display: grid;
         grid-template-columns: 380px 1fr 1fr 1fr;
@@ -48,11 +42,10 @@
         border-bottom: 1px solid var(--line);
     }
     h1 { margin: 0; font-size: 66px; line-height: 1.02; font-weight: 800; letter-spacing: -1.5px; }
-    .lead { margin: 14px 0 0; font-size: 16px; color: var(--muted); line-height: 1.45; }
+    .question { margin: 16px 0 0; font-size: 19px; color: var(--soft); }
     .step h2 { margin: 8px 0 12px; font-size: 17px; font-weight: 700; letter-spacing: 0.06em; }
     .step p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--soft); }
 
-    /* ── body: diagram left, notes right ── */
     .body {
         display: grid;
         grid-template-columns: 600px 1fr;
@@ -62,110 +55,75 @@
 
     .label { font-size: 13.5px; font-weight: 700; letter-spacing: 0.07em; }
 
-    .example-head { display: flex; gap: 22px; align-items: baseline; margin-bottom: 16px; }
-    .example-head em { font-size: 16px; color: var(--soft); }
-    .example-row { display: grid; grid-template-columns: 96px 1fr; gap: 12px; margin-bottom: 11px; font-size: 15px; align-items: baseline; color: var(--soft); }
-    .chip {
-        display: inline-block;
-        padding: 3px 9px;
-        margin: 0 5px 5px 0;
-        border-radius: 5px;
-        background: #1c2a3a;
-        border: 1px solid #33475e;
-        font-size: 13.5px;
+    .legend { display: flex; gap: 22px; align-items: center; margin-bottom: 8px; font-size: 15px; color: var(--soft); }
+    .legend .key { display: inline-flex; align-items: center; gap: 8px; }
+    .legend .swatch { width: 22px; height: 12px; border-radius: 3px; border: 2px solid var(--c); }
+    .legend-note { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+
+    .file-title { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
+    .plain { font-size: 13px; line-height: 1.55; white-space: pre; color: var(--muted); margin: 4px 0; }
+    .block {
+        font-size: 13px;
+        line-height: 1.55;
+        white-space: pre;
         color: var(--text);
-    }
-
-    .diagram { position: relative; margin-top: 30px; padding-left: 128px; }
-
-    .caller {
-        position: absolute;
-        left: 0;
-        width: 98px;
-        padding: 10px 6px;
-        border: 1px solid #4a5d74;
-        border-radius: 7px;
-        background: #1a2532;
-        text-align: center;
-        font-size: 14px;
-    }
-    .caller small { display: block; margin-top: 3px; font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 12px; color: var(--muted); }
-
-    .file {
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        background: #101924;
-        padding: 14px 16px 6px;
-    }
-    .file-title { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
-
-    .section {
-        border: 1px solid var(--box-line);
-        border-radius: 8px;
-        background: var(--box);
-        padding: 9px 14px;
-        margin-bottom: 10px;
-        font-size: 14.5px;
-        color: var(--soft);
-    }
-    .section .label { color: var(--muted); margin-right: 10px; }
-
-    .lifecycle {
-        border: 1px dashed var(--box-line);
-        border-radius: 10px;
-        padding: 10px 12px 2px;
-        margin-bottom: 10px;
-    }
-    .lifecycle > .label { color: var(--muted); display: block; margin-bottom: 10px; }
-
-    .row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; margin-bottom: 12px; }
-    .moment { font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--c); line-height: 1.3; }
-    .parts { display: flex; gap: 10px; align-items: center; }
-    .parts.stack { flex-direction: column; align-items: flex-start; gap: 4px; }
-    .part {
-        min-width: 128px;
-        padding: 8px 12px;
+        background: #121c27;
         border: 1.5px solid var(--c);
         border-radius: 7px;
-        background: #121c27;
-        text-align: center;
-        font-size: 15px;
-        color: var(--text);
+        padding: 7px 12px;
+        margin-bottom: 8px;
+        position: relative;
     }
-    .part small { display: block; margin-top: 2px; font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 12px; color: var(--muted); }
-    .then { font-size: 13px; color: var(--muted); padding-left: 56px; }
+    .block.in { margin-left: 26px; }
+    .block .tag {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--c);
+    }
+    .c { color: #6f8399; }
+    .s { color: #b6e3a1; }
 
-    .load  { --c: var(--load); }
-    .menu  { --c: var(--menu); }
-    .frame { --c: var(--frame); }
-    .mouse { --c: var(--mouse); }
+    .remember { --c: var(--remember); }
+    .change   { --c: var(--change); }
+    .show     { --c: var(--show); }
+    .value    { --c: var(--value); }
 
-    .notes section { border-top: 1px solid var(--line); padding: 15px 0 12px; }
+    .notes section { border-top: 1px solid var(--line); padding: 14px 0 10px; }
     .notes section:first-child { border-top: none; padding-top: 0; }
-    .notes h3 { margin: 0 0 10px; font-size: 18.5px; font-weight: 700; letter-spacing: 0.04em; display: inline-block; }
+    .notes h3 { margin: 0 0 9px; font-size: 18px; font-weight: 700; letter-spacing: 0.04em; display: inline-block; }
     .notes ul { margin: 0; padding: 0; }
     .notes li {
         list-style: none;
         position: relative;
         padding-left: 26px;
-        margin-bottom: 8px;
+        margin-bottom: 7px;
         font-size: 15px;
         line-height: 1.45;
         color: var(--soft);
     }
     .notes li::before { content: "—"; position: absolute; left: 0; color: var(--muted); }
+    .notes .no::before { content: "✕"; color: #ff7a7a; font-size: 13px; top: 1px; }
 
     .bottom {
         display: grid;
         grid-template-columns: 600px 1fr;
         column-gap: 100px;
-        padding: 18px 44px 36px;
+        padding: 20px 44px 36px;
         border-top: 1px solid var(--line);
-        margin-top: 14px;
+        margin-top: 16px;
         align-items: end;
     }
-    .bottom .rule { font-size: 22px; font-weight: 700; line-height: 1.3; }
-    .bottom .src { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .rule { font-size: 21px; font-weight: 700; line-height: 1.45; }
+    .rule-rows { display: grid; grid-template-columns: 110px 1fr; gap: 2px 10px; margin-top: 8px; font-size: 18px; }
+    .rule-rows span:nth-child(odd) { color: var(--c); }
+    .rule-rows span:nth-child(even) { color: var(--soft); font-weight: 600; }
+    .src { font-size: 13px; color: var(--muted); line-height: 1.6; }
 
     svg.overlay { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
 </style>
@@ -176,147 +134,171 @@
     <header class="top">
         <div>
             <h1>Project<br>Template</h1>
-            <p class="lead">The eight parts every project has, and the moment each one is called.</p>
+            <p class="question">What do I write in a project file?</p>
         </div>
         <div class="step">
-            <h2>1 — COPY</h2>
-            <p>In <code>js/projects/</code>, copy <code>project-template.js</code> to <code>name.js</code>. Keep its three sections: State, Helpers, Lifecycle.</p>
+            <h2>1 — STATE</h2>
+            <p>One object with everything the project remembers: numbers, points, whether something is playing.</p>
         </div>
         <div class="step">
-            <h2>2 — FILL</h2>
-            <p>Fill in the eight parts. Empty is allowed, missing is not: when the page loads, <code>main.js</code> names any missing part.</p>
+            <h2>2 — HELPERS</h2>
+            <p>Small functions with one job each, used by the lifecycle. Nothing outside the file calls them.</p>
         </div>
         <div class="step">
-            <h2>3 — REGISTER</h2>
-            <p>In <code>index.html</code> add an <code>&lt;option value="name"&gt;</code> and a controls <code>&lt;div&gt;</code>. In <code>main.js</code> import it and add it to <code>projects</code>.</p>
+            <h2>3 — LIFECYCLE</h2>
+            <p>Eight parts with fixed names. Each one has a single job. A part may be empty, but it may not be missing.</p>
         </div>
     </header>
 
     <div class="body">
         <div class="left">
-            <div class="example-head"><span class="label">WORKED EXAMPLE</span><em>Sine — Tiny Steps</em></div>
-            <div class="example-row"><span class="label">PANEL</span><span><code>"tiny-step-controls"</code></span></div>
-            <div class="example-row"><span class="label">SETUP</span><span><span class="chip">θ input</span><span class="chip">steps input</span><span class="chip">Reset</span><span class="chip">Next step</span><span class="chip">Run</span></span></div>
-            <div class="example-row"><span class="label">UPDATE</span><span>while running: one step every 3 ÷ <i>N</i> s &nbsp;→&nbsp; <i>N</i> = 20: every 0.15 s</span></div>
-            <div class="example-row"><span class="label">DRAW</span><span><span class="chip">circle</span><span class="chip">path</span><span class="chip">radius</span><span class="chip">height</span><span class="chip">point</span><span class="chip">readout</span></span></div>
-
-            <div class="diagram" id="diagram">
-                <div class="caller mono" id="caller-main">main.js<small>runs the lifecycle</small></div>
-                <div class="caller mono" id="caller-input">input.js<small>the mouse</small></div>
-
-                <div class="file">
-                    <div class="file-title mono">js/projects/name.js</div>
-
-                    <div class="section" id="box-state"><span class="label">1 STATE</span>everything remembered between frames</div>
-                    <div class="section" id="box-helpers"><span class="label">2 HELPERS</span>small functions the lifecycle uses</div>
-
-                    <div class="lifecycle">
-                        <span class="label">3 LIFECYCLE</span>
-
-                        <div class="row load" id="row-load">
-                            <div class="moment">page<br>loads</div>
-                            <div class="parts">
-                                <div class="part mono">panel<small>which controls</small></div>
-                                <div class="part mono" id="box-setup">setup()<small>once</small></div>
-                            </div>
-                        </div>
-
-                        <div class="row menu" id="row-menu">
-                            <div class="moment">menu<br>choice</div>
-                            <div class="parts">
-                                <div class="part mono">leave()<small>old project</small></div>
-                                <div class="part mono" id="box-enter">enter()<small>new project</small></div>
-                            </div>
-                        </div>
-
-                        <div class="row frame" id="row-frame">
-                            <div class="moment">every<br>frame</div>
-                            <div class="parts stack">
-                                <div class="part mono" id="box-update">update(dt)<small>change the state</small></div>
-                                <div class="then">then</div>
-                                <div class="part mono" id="box-draw">draw()<small>show the state</small></div>
-                            </div>
-                        </div>
-
-                        <div class="row mouse" id="row-mouse">
-                            <div class="moment">mouse</div>
-                            <div class="parts">
-                                <div class="part mono">grab(world)<small>pressed</small></div>
-                                <div class="part mono" id="box-drag">drag(world)<small>moved</small></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="legend">
+                <span class="label">EVERY LINE</span>
+                <span class="key remember"><span class="swatch"></span>remembers</span>
+                <span class="key change"><span class="swatch"></span>changes</span>
+                <span class="key show"><span class="swatch"></span>shows</span>
+                <span class="key value"><span class="swatch"></span>names</span>
             </div>
+            <p class="legend-note">Worked example: the real <code>tiny-steps.js</code>, shortened where you see <span class="mono">…</span></p>
 
-            <div class="notes rules-left">
-            <section>
-                <h3>RULES</h3>
-                <ul>
-                    <li>Keep all eight parts, even when empty.</li>
-                    <li>A project never calls its own parts, never redraws, never starts a timer.</li>
-                    <li>Math goes in <code>name-math.js</code>: numbers only.</li>
-                </ul>
-            </section>
-            </div>
+            <div class="file-title mono">js/projects/tiny-steps.js</div>
+
+<div class="block mono remember" id="b-state"><span class="tag">state</span>const state = {
+    theta: 1, steps: 20, h: 0.05,
+    step: 0,                  <span class="c">// steps taken so far</span>
+    point: { x: 1, y: 0 },    <span class="c">// current point</span>
+    path: [{ x: 1, y: 0 }],   <span class="c">// every point visited</span>
+    running: false,           <span class="c">// is Run playing?</span>
+    clock: 0                  <span class="c">// seconds collected</span>
+};</div>
+
+<div class="block mono change" id="b-helpers"><span class="tag">helpers</span>function takeStep() {
+    if (state.step &gt;= state.steps) return;
+    state.point = tinyStep(state.point, state.h);
+    state.path.push(state.point);
+    state.step += 1;
+}
+function reset() { … }   function toWorld(p) { … }</div>
+
+<div class="plain mono">export const tinyStepsProject = {</div>
+
+<div class="block mono in value" id="b-panel"><span class="tag">panel</span>panel: <span class="s">"tiny-step-controls"</span>,</div>
+
+<div class="block mono in change" id="b-setup"><span class="tag">setup</span>setup() {
+    input(<span class="s">"run-steps"</span>).addEventListener(<span class="s">"click"</span>, () =&gt; {
+        state.running = true;
+    });
+    …   <span class="c">// Reset, Next step, θ and steps inputs</span>
+},</div>
+
+<div class="block mono in change" id="b-enter"><span class="tag">enter</span>enter() { },   <span class="c">// state is kept from the last visit</span></div>
+
+<div class="block mono in change" id="b-update"><span class="tag">update</span>update(dt) {
+    if (!state.running) return;
+    const secondsPerStep = RUN_SECONDS / state.steps;
+    state.clock += dt;
+    while (state.clock &gt;= secondsPerStep &amp;&amp; …) {
+        takeStep();
+        state.clock -= secondsPerStep;
+    }
+},</div>
+
+<div class="block mono in show" id="b-draw"><span class="tag">draw</span>draw() {
+    drawCircle(origin, UNIT, colors.circle, 1.5);
+    drawPath(state.path.map(toWorld), colors.path, 2);
+    …   <span class="c">// height line, radius, next direction</span>
+    drawPoint(current);
+    showReadout();
+},</div>
+
+<div class="block mono in change" id="b-leave"><span class="tag">leave</span>leave() { state.running = false; },</div>
+
+<div class="block mono in change" id="b-grab"><span class="tag">grab · drag</span>grab(world) { return false; },   <span class="c">// nothing to drag</span>
+drag(world) { }</div>
+
+<div class="plain mono">};</div>
         </div>
 
         <div class="notes">
             <section>
-                <h3 id="note-state">STATE + HELPERS</h3>
+                <h3 id="n-state">STATE</h3>
                 <ul>
-                    <li>State: one object holding everything the project remembers, e.g. <code>step</code>, <code>point</code>, <code>running</code>.</li>
-                    <li>Helpers: small functions such as <code>reset()</code> and <code>takeStep()</code>.</li>
-                    <li>Nothing outside the file uses either.</li>
+                    <li>Everything that must survive from one moment to the next, in one object called <code>state</code>.</li>
+                    <li>Values that never change, like <code>UNIT = 200</code>, go above it as constants.</li>
+                    <li class="no">No functions, no drawing.</li>
                 </ul>
             </section>
             <section>
-                <h3 id="note-setup">PANEL + SETUP()</h3>
+                <h3 id="n-helpers">HELPERS</h3>
                 <ul>
-                    <li><code>panel</code>: the id of the project's controls <code>&lt;div&gt;</code> in <code>index.html</code>.</li>
-                    <li><code>setup()</code>: once, when the page loads. Connects buttons with <code>addEventListener</code>.</li>
-                    <li>A button only changes the state. The next frame shows it.</li>
+                    <li>A job you need more than once gets a name: <code>takeStep()</code> is used by both Next step and Run.</li>
+                    <li class="no">No math rules: <code>tinyStep()</code> lives in <code>tiny-steps-math.js</code>.</li>
                 </ul>
             </section>
             <section>
-                <h3 id="note-menu">LEAVE() + ENTER()</h3>
+                <h3 id="n-panel">PANEL</h3>
                 <ul>
-                    <li>The menu changes project: <code>leave()</code> on the old one, then <code>enter()</code> on the new one.</li>
-                    <li><code>leave()</code> pauses. Tiny Steps sets <code>running = false</code>.</li>
-                    <li><code>enter()</code> is often empty: the state is kept between visits.</li>
+                    <li>The id of this project's controls <code>&lt;div&gt;</code> in <code>index.html</code>.</li>
+                    <li>The only part that is a value, not a function.</li>
                 </ul>
             </section>
             <section>
-                <h3 id="note-update">UPDATE(dt)</h3>
+                <h3 id="n-setup">SETUP()</h3>
                 <ul>
-                    <li>Every frame, before <code>draw()</code>. The only place where things move over time.</li>
-                    <li><code>dt</code> = seconds since the last frame: about 1 ÷ 60 ≈ 0.017.</li>
-                    <li>Collect <code>dt</code> and act when enough has built up: 0.15 s collected → one tiny step.</li>
+                    <li>Connect each button and input to a small change of state: Run sets <code>running = true</code>.</li>
+                    <li class="no">Don't draw here, and don't start timers.</li>
                 </ul>
             </section>
             <section>
-                <h3 id="note-draw">DRAW()</h3>
+                <h3 id="n-enter">ENTER()</h3>
                 <ul>
-                    <li>Every frame, after <code>update(dt)</code>. Shows the state and never changes it.</li>
-                    <li>Uses the pens with world coordinates: <code>drawPoint</code>, <code>drawVector</code>, <code>drawPath</code>.</li>
-                    <li>The grid comes before it and the numbers after: not the project's job.</li>
+                    <li>Get ready when the project is shown. Often empty.</li>
                 </ul>
             </section>
             <section>
-                <h3 id="note-mouse">GRAB(world) + DRAG(world)</h3>
+                <h3 id="n-update">UPDATE(dt)</h3>
                 <ul>
-                    <li><code>grab</code>: the mouse was pressed here. Return <code>true</code> to take the drag, <code>false</code> to let the view pan.</li>
-                    <li><code>drag</code>: called on every mouse move while the project holds the drag.</li>
+                    <li>Whatever changes by itself over time. <code>dt</code> is the seconds since the last update.</li>
+                    <li>Collect <code>dt</code> and act when enough has built up: with <i>N</i> = 20, a step every 3 ÷ 20 = 0.15 s.</li>
+                    <li class="no">Don't draw here.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="n-draw">DRAW()</h3>
+                <ul>
+                    <li>Show the state with the pens, in world coordinates. Text readouts belong here too.</li>
+                    <li class="no">Read the state, never change it.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="n-leave">LEAVE()</h3>
+                <ul>
+                    <li>Pause whatever is in progress: <code>running = false</code>.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="n-grab">GRAB(world) + DRAG(world)</h3>
+                <ul>
+                    <li><code>grab</code>: return <code>true</code> if this world point hits something draggable.</li>
+                    <li><code>drag</code>: move that thing to the new world point.</li>
+                    <li>Nothing to drag: return <code>false</code> and leave <code>drag</code> empty.</li>
                 </ul>
             </section>
         </div>
     </div>
 
     <div class="bottom">
-        <div class="rule"><code style="font-size: 0.9em;">main.js</code> decides when.<br>The project decides what.</div>
+        <div class="rule">
+            Not sure where a line goes? Ask what it does.
+            <div class="rule-rows">
+                <span style="--c: var(--remember);">remember</span><span>→ state</span>
+                <span style="--c: var(--change);">change</span><span>→ setup, enter, update, leave, grab, drag</span>
+                <span style="--c: var(--show);">show</span><span>→ draw</span>
+            </div>
+        </div>
         <div class="src">
-            Source: <code>js/projects/project-template.js</code><br>
-            Called by <code>js/main.js</code> and <code>js/core/input.js</code>
+            When each part runs: see the <code>main.js</code> note.<br>
+            Start a project from <code>js/projects/project-template.js</code>
         </div>
     </div>
 
@@ -324,11 +306,10 @@
 </div>
 
 <script>
-// Draws the connecting lines after the page is laid out:
-// callers → lifecycle rows on the left, boxes → notes on the right.
+// Leader lines from each code block to its note, drawn after layout.
+// Lines going up and lines going down use separate lanes, so none cross.
 
 const page = document.getElementById("page");
-const overlay = document.getElementById("overlay");
 
 function box(id) {
     const r = document.getElementById(id).getBoundingClientRect();
@@ -336,71 +317,36 @@ function box(id) {
     return { l: r.left - p.left, r: r.right - p.left, t: r.top - p.top, b: r.bottom - p.top, cy: (r.top + r.bottom) / 2 - p.top };
 }
 
-function line(points, color, width) {
-    return `<polyline points="${points.map((q) => q.join(",")).join(" ")}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linejoin="round"/>`;
-}
-
-function arrowHead(x, y, color) {
-    return `<path d="M${x - 7} ${y - 4}L${x} ${y}L${x - 7} ${y + 4}z" fill="${color}"/>`;
-}
-
 function draw() {
-    const diagram = box("diagram");
-    let out = "";
-
-    // place the callers next to the rows they call
-    const rows = ["row-load", "row-menu", "row-frame", "row-mouse"].map(box);
-    const mainEl = document.getElementById("caller-main");
-    const inputEl = document.getElementById("caller-input");
-    const midMain = (rows[0].cy + rows[2].cy) / 2;
-    mainEl.style.top = (midMain - diagram.t - mainEl.offsetHeight / 2) + "px";
-    inputEl.style.top = (rows[3].cy - diagram.t - inputEl.offsetHeight / 2) + "px";
-
-    // callers → rows, through a short vertical bus
-    const callerColor = "#6f8199";
-    function bus(callerId, rowList) {
-        const c = box(callerId);
-        const x = c.r + 14;
-        out += line([[c.r, c.cy], [x, c.cy]], callerColor, 1.3);
-        if (rowList.length > 1) {
-            out += line([[x, Math.min(...rowList.map((r) => r.cy))], [x, Math.max(...rowList.map((r) => r.cy))]], callerColor, 1.3);
-        }
-        rowList.forEach((r) => {
-            out += line([[x, r.cy], [r.l - 6, r.cy]], callerColor, 1.3);
-            out += arrowHead(r.l - 4, r.cy, callerColor);
-        });
-    }
-    bus("caller-main", rows.slice(0, 3));
-    bus("caller-input", [rows[3]]);
-
-    // boxes → notes. Leaders going up and going down get separate
-    // lanes in the gutter, ordered so that no two lines cross.
     const pairs = [
-        ["box-helpers", "note-state"],
-        ["box-setup", "note-setup"],
-        ["box-enter", "note-menu"],
-        ["box-update", "note-update"],
-        ["box-draw", "note-draw"],
-        ["box-drag", "note-mouse"]
-    ].map(([from, to]) => ({ s: box(from), t: box(to) }));
+        ["b-state", "n-state"], ["b-helpers", "n-helpers"], ["b-panel", "n-panel"],
+        ["b-setup", "n-setup"], ["b-enter", "n-enter"], ["b-update", "n-update"],
+        ["b-draw", "n-draw"], ["b-leave", "n-leave"], ["b-grab", "n-grab"]
+    ].map(([from, to]) => {
+        const s = box(from);
+        // start a little below the top of tall blocks, beside their first line
+        return { s, sy: Math.min(s.cy, s.t + 14), t: box(to) };
+    });
 
-    const gutterLeft = 44 + 600 + 18;
-    const gutterRight = 44 + 600 + 100 - 16;
-    const lane = 11;
-
-    const up = pairs.filter((q) => q.t.cy < q.s.cy).sort((a, b) => a.s.cy - b.s.cy);
-    const down = pairs.filter((q) => q.t.cy >= q.s.cy).sort((a, b) => a.s.cy - b.s.cy);
+    const gutterLeft = 44 + 600 + 14;
+    const gutterRight = 44 + 600 + 100 - 14;
+    const lane = 8;
+    const up = pairs.filter((q) => q.t.cy < q.sy).sort((a, b) => a.sy - b.sy);
+    const down = pairs.filter((q) => q.t.cy >= q.sy).sort((a, b) => a.sy - b.sy);
     up.forEach((q, i) => { q.x = gutterLeft + i * lane; });
     down.forEach((q, i) => { q.x = gutterRight - i * lane; });
 
+    let out = "";
     pairs.forEach((q) => {
-        out += `<circle cx="${q.s.r + 4}" cy="${q.s.cy}" r="3" fill="var(--leader)"/>`;
-        out += line([[q.s.r + 4, q.s.cy], [q.x, q.s.cy], [q.x, q.t.cy], [q.t.l - 8, q.t.cy]], "var(--leader)", 1.1);
+        const x0 = q.s.r + 4;
+        out += `<circle cx="${x0}" cy="${q.sy}" r="3" fill="var(--leader)"/>`;
+        out += `<polyline points="${x0},${q.sy} ${q.x},${q.sy} ${q.x},${q.t.cy} ${q.t.l - 8},${q.t.cy}" fill="none" stroke="var(--leader)" stroke-width="1.1" stroke-linejoin="round"/>`;
     });
 
-    overlay.setAttribute("width", page.offsetWidth);
-    overlay.setAttribute("height", page.offsetHeight);
-    overlay.innerHTML = out;
+    const svg = document.getElementById("overlay");
+    svg.setAttribute("width", page.offsetWidth);
+    svg.setAttribute("height", page.offsetHeight);
+    svg.innerHTML = out;
 }
 
 document.fonts.ready.then(draw);
