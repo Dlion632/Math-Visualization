@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1200">
+<title>Project Template</title>
+<style>
+    :root {
+        --bg: #0d141d;
+        --line: #26364a;
+        --box: #16212e;
+        --box-line: #33475e;
+        --text: #e8eef5;
+        --soft: #cfd9e4;
+        --muted: #8fa2b8;
+        --leader: #7f91a7;
+
+        /* one colour per moment, used on the boxes and labels only */
+        --load: #a3b3c6;
+        --menu: #b49cff;
+        --frame: #3fd6c2;
+        --mouse: #ff9f5a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body { margin: 0; background: #05080c; }
+
+    .page {
+        position: relative;
+        width: 1200px;
+        margin: 0 auto;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", sans-serif;
+    }
+
+    code, .mono { font-family: "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace; }
+    code { font-size: 0.88em; color: #fff; white-space: nowrap; }
+    .rules-left { margin-top: 34px; padding-left: 128px; }
+
+    /* ── header ── */
+    .top {
+        display: grid;
+        grid-template-columns: 380px 1fr 1fr 1fr;
+        gap: 30px;
+        padding: 44px 44px 34px;
+        border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0; font-size: 66px; line-height: 1.02; font-weight: 800; letter-spacing: -1.5px; }
+    .lead { margin: 14px 0 0; font-size: 16px; color: var(--muted); line-height: 1.45; }
+    .step h2 { margin: 8px 0 12px; font-size: 17px; font-weight: 700; letter-spacing: 0.06em; }
+    .step p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--soft); }
+
+    /* ── body: diagram left, notes right ── */
+    .body {
+        display: grid;
+        grid-template-columns: 600px 1fr;
+        column-gap: 100px;
+        padding: 26px 44px 10px;
+    }
+
+    .label { font-size: 13.5px; font-weight: 700; letter-spacing: 0.07em; }
+
+    .example-head { display: flex; gap: 22px; align-items: baseline; margin-bottom: 16px; }
+    .example-head em { font-size: 16px; color: var(--soft); }
+    .example-row { display: grid; grid-template-columns: 96px 1fr; gap: 12px; margin-bottom: 11px; font-size: 15px; align-items: baseline; color: var(--soft); }
+    .chip {
+        display: inline-block;
+        padding: 3px 9px;
+        margin: 0 5px 5px 0;
+        border-radius: 5px;
+        background: #1c2a3a;
+        border: 1px solid #33475e;
+        font-size: 13.5px;
+        color: var(--text);
+    }
+
+    .diagram { position: relative; margin-top: 30px; padding-left: 128px; }
+
+    .caller {
+        position: absolute;
+        left: 0;
+        width: 98px;
+        padding: 10px 6px;
+        border: 1px solid #4a5d74;
+        border-radius: 7px;
+        background: #1a2532;
+        text-align: center;
+        font-size: 14px;
+    }
+    .caller small { display: block; margin-top: 3px; font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 12px; color: var(--muted); }
+
+    .file {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #101924;
+        padding: 14px 16px 6px;
+    }
+    .file-title { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+
+    .section {
+        border: 1px solid var(--box-line);
+        border-radius: 8px;
+        background: var(--box);
+        padding: 9px 14px;
+        margin-bottom: 10px;
+        font-size: 14.5px;
+        color: var(--soft);
+    }
+    .section .label { color: var(--muted); margin-right: 10px; }
+
+    .lifecycle {
+        border: 1px dashed var(--box-line);
+        border-radius: 10px;
+        padding: 10px 12px 2px;
+        margin-bottom: 10px;
+    }
+    .lifecycle > .label { color: var(--muted); display: block; margin-bottom: 10px; }
+
+    .row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .moment { font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--c); line-height: 1.3; }
+    .parts { display: flex; gap: 10px; align-items: center; }
+    .parts.stack { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .part {
+        min-width: 128px;
+        padding: 8px 12px;
+        border: 1.5px solid var(--c);
+        border-radius: 7px;
+        background: #121c27;
+        text-align: center;
+        font-size: 15px;
+        color: var(--text);
+    }
+    .part small { display: block; margin-top: 2px; font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 12px; color: var(--muted); }
+    .then { font-size: 13px; color: var(--muted); padding-left: 56px; }
+
+    .load  { --c: var(--load); }
+    .menu  { --c: var(--menu); }
+    .frame { --c: var(--frame); }
+    .mouse { --c: var(--mouse); }
+
+    .notes section { border-top: 1px solid var(--line); padding: 15px 0 12px; }
+    .notes section:first-child { border-top: none; padding-top: 0; }
+    .notes h3 { margin: 0 0 10px; font-size: 18.5px; font-weight: 700; letter-spacing: 0.04em; display: inline-block; }
+    .notes ul { margin: 0; padding: 0; }
+    .notes li {
+        list-style: none;
+        position: relative;
+        padding-left: 26px;
+        margin-bottom: 8px;
+        font-size: 15px;
+        line-height: 1.45;
+        color: var(--soft);
+    }
+    .notes li::before { content: "—"; position: absolute; left: 0; color: var(--muted); }
+
+    .bottom {
+        display: grid;
+        grid-template-columns: 600px 1fr;
+        column-gap: 100px;
+        padding: 18px 44px 36px;
+        border-top: 1px solid var(--line);
+        margin-top: 14px;
+        align-items: end;
+    }
+    .bottom .rule { font-size: 22px; font-weight: 700; line-height: 1.3; }
+    .bottom .src { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    svg.overlay { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+</style>
+</head>
+<body>
+<div class="page" id="page">
+
+    <header class="top">
+        <div>
+            <h1>Project<br>Template</h1>
+            <p class="lead">The eight parts every project has, and the moment each one is called.</p>
+        </div>
+        <div class="step">
+            <h2>1 — COPY</h2>
+            <p>In <code>js/projects/</code>, copy <code>project-template.js</code> to <code>name.js</code>. Keep its three sections: State, Helpers, Lifecycle.</p>
+        </div>
+        <div class="step">
+            <h2>2 — FILL</h2>
+            <p>Fill in the eight parts. Empty is allowed, missing is not: when the page loads, <code>main.js</code> names any missing part.</p>
+        </div>
+        <div class="step">
+            <h2>3 — REGISTER</h2>
+            <p>In <code>index.html</code> add an <code>&lt;option value="name"&gt;</code> and a controls <code>&lt;div&gt;</code>. In <code>main.js</code> import it and add it to <code>projects</code>.</p>
+        </div>
+    </header>
+
+    <div class="body">
+        <div class="left">
+            <div class="example-head"><span class="label">WORKED EXAMPLE</span><em>Sine — Tiny Steps</em></div>
+            <div class="example-row"><span class="label">PANEL</span><span><code>"tiny-step-controls"</code></span></div>
+            <div class="example-row"><span class="label">SETUP</span><span><span class="chip">θ input</span><span class="chip">steps input</span><span class="chip">Reset</span><span class="chip">Next step</span><span class="chip">Run</span></span></div>
+            <div class="example-row"><span class="label">UPDATE</span><span>while running: one step every 3 ÷ <i>N</i> s &nbsp;→&nbsp; <i>N</i> = 20: every 0.15 s</span></div>
+            <div class="example-row"><span class="label">DRAW</span><span><span class="chip">circle</span><span class="chip">path</span><span class="chip">radius</span><span class="chip">height</span><span class="chip">point</span><span class="chip">readout</span></span></div>
+
+            <div class="diagram" id="diagram">
+                <div class="caller mono" id="caller-main">main.js<small>runs the lifecycle</small></div>
+                <div class="caller mono" id="caller-input">input.js<small>the mouse</small></div>
+
+                <div class="file">
+                    <div class="file-title mono">js/projects/name.js</div>
+
+                    <div class="section" id="box-state"><span class="label">1 STATE</span>everything remembered between frames</div>
+                    <div class="section" id="box-helpers"><span class="label">2 HELPERS</span>small functions the lifecycle uses</div>
+
+                    <div class="lifecycle">
+                        <span class="label">3 LIFECYCLE</span>
+
+                        <div class="row load" id="row-load">
+                            <div class="moment">page<br>loads</div>
+                            <div class="parts">
+                                <div class="part mono">panel<small>which controls</small></div>
+                                <div class="part mono" id="box-setup">setup()<small>once</small></div>
+                            </div>
+                        </div>
+
+                        <div class="row menu" id="row-menu">
+                            <div class="moment">menu<br>choice</div>
+                            <div class="parts">
+                                <div class="part mono">leave()<small>old project</small></div>
+                                <div class="part mono" id="box-enter">enter()<small>new project</small></div>
+                            </div>
+                        </div>
+
+                        <div class="row frame" id="row-frame">
+                            <div class="moment">every<br>frame</div>
+                            <div class="parts stack">
+                                <div class="part mono" id="box-update">update(dt)<small>change the state</small></div>
+                                <div class="then">then</div>
+                                <div class="part mono" id="box-draw">draw()<small>show the state</small></div>
+                            </div>
+                        </div>
+
+                        <div class="row mouse" id="row-mouse">
+                            <div class="moment">mouse</div>
+                            <div class="parts">
+                                <div class="part mono">grab(world)<small>pressed</small></div>
+                                <div class="part mono" id="box-drag">drag(world)<small>moved</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notes rules-left">
+            <section>
+                <h3>RULES</h3>
+                <ul>
+                    <li>Keep all eight parts, even when empty.</li>
+                    <li>A project never calls its own parts, never redraws, never starts a timer.</li>
+                    <li>Math goes in <code>name-math.js</code>: numbers only.</li>
+                </ul>
+            </section>
+            </div>
+        </div>
+
+        <div class="notes">
+            <section>
+                <h3 id="note-state">STATE + HELPERS</h3>
+                <ul>
+                    <li>State: one object holding everything the project remembers, e.g. <code>step</code>, <code>point</code>, <code>running</code>.</li>
+                    <li>Helpers: small functions such as <code>reset()</code> and <code>takeStep()</code>.</li>
+                    <li>Nothing outside the file uses either.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="note-setup">PANEL + SETUP()</h3>
+                <ul>
+                    <li><code>panel</code>: the id of the project's controls <code>&lt;div&gt;</code> in <code>index.html</code>.</li>
+                    <li><code>setup()</code>: once, when the page loads. Connects buttons with <code>addEventListener</code>.</li>
+                    <li>A button only changes the state. The next frame shows it.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="note-menu">LEAVE() + ENTER()</h3>
+                <ul>
+                    <li>The menu changes project: <code>leave()</code> on the old one, then <code>enter()</code> on the new one.</li>
+                    <li><code>leave()</code> pauses. Tiny Steps sets <code>running = false</code>.</li>
+                    <li><code>enter()</code> is often empty: the state is kept between visits.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="note-update">UPDATE(dt)</h3>
+                <ul>
+                    <li>Every frame, before <code>draw()</code>. The only place where things move over time.</li>
+                    <li><code>dt</code> = seconds since the last frame: about 1 ÷ 60 ≈ 0.017.</li>
+                    <li>Collect <code>dt</code> and act when enough has built up: 0.15 s collected → one tiny step.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="note-draw">DRAW()</h3>
+                <ul>
+                    <li>Every frame, after <code>update(dt)</code>. Shows the state and never changes it.</li>
+                    <li>Uses the pens with world coordinates: <code>drawPoint</code>, <code>drawVector</code>, <code>drawPath</code>.</li>
+                    <li>The grid comes before it and the numbers after: not the project's job.</li>
+                </ul>
+            </section>
+            <section>
+                <h3 id="note-mouse">GRAB(world) + DRAG(world)</h3>
+                <ul>
+                    <li><code>grab</code>: the mouse was pressed here. Return <code>true</code> to take the drag, <code>false</code> to let the view pan.</li>
+                    <li><code>drag</code>: called on every mouse move while the project holds the drag.</li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <div class="bottom">
+        <div class="rule"><code style="font-size: 0.9em;">main.js</code> decides when.<br>The project decides what.</div>
+        <div class="src">
+            Source: <code>js/projects/project-template.js</code><br>
+            Called by <code>js/main.js</code> and <code>js/core/input.js</code>
+        </div>
+    </div>
+
+    <svg class="overlay" id="overlay"></svg>
+</div>
+
+<script>
+// Draws the connecting lines after the page is laid out:
+// callers → lifecycle rows on the left, boxes → notes on the right.
+
+const page = document.getElementById("page");
+const overlay = document.getElementById("overlay");
+
+function box(id) {
+    const r = document.getElementById(id).getBoundingClientRect();
+    const p = page.getBoundingClientRect();
+    return { l: r.left - p.left, r: r.right - p.left, t: r.top - p.top, b: r.bottom - p.top, cy: (r.top + r.bottom) / 2 - p.top };
+}
+
+function line(points, color, width) {
+    return `<polyline points="${points.map((q) => q.join(",")).join(" ")}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linejoin="round"/>`;
+}
+
+function arrowHead(x, y, color) {
+    return `<path d="M${x - 7} ${y - 4}L${x} ${y}L${x - 7} ${y + 4}z" fill="${color}"/>`;
+}
+
+function draw() {
+    const diagram = box("diagram");
+    let out = "";
+
+    // place the callers next to the rows they call
+    const rows = ["row-load", "row-menu", "row-frame", "row-mouse"].map(box);
+    const mainEl = document.getElementById("caller-main");
+    const inputEl = document.getElementById("caller-input");
+    const midMain = (rows[0].cy + rows[2].cy) / 2;
+    mainEl.style.top = (midMain - diagram.t - mainEl.offsetHeight / 2) + "px";
+    inputEl.style.top = (rows[3].cy - diagram.t - inputEl.offsetHeight / 2) + "px";
+
+    // callers → rows, through a short vertical bus
+    const callerColor = "#6f8199";
+    function bus(callerId, rowList) {
+        const c = box(callerId);
+        const x = c.r + 14;
+        out += line([[c.r, c.cy], [x, c.cy]], callerColor, 1.3);
+        if (rowList.length > 1) {
+            out += line([[x, Math.min(...rowList.map((r) => r.cy))], [x, Math.max(...rowList.map((r) => r.cy))]], callerColor, 1.3);
+        }
+        rowList.forEach((r) => {
+            out += line([[x, r.cy], [r.l - 6, r.cy]], callerColor, 1.3);
+            out += arrowHead(r.l - 4, r.cy, callerColor);
+        });
+    }
+    bus("caller-main", rows.slice(0, 3));
+    bus("caller-input", [rows[3]]);
+
+    // boxes → notes. Leaders going up and going down get separate
+    // lanes in the gutter, ordered so that no two lines cross.
+    const pairs = [
+        ["box-helpers", "note-state"],
+        ["box-setup", "note-setup"],
+        ["box-enter", "note-menu"],
+        ["box-update", "note-update"],
+        ["box-draw", "note-draw"],
+        ["box-drag", "note-mouse"]
+    ].map(([from, to]) => ({ s: box(from), t: box(to) }));
+
+    const gutterLeft = 44 + 600 + 18;
+    const gutterRight = 44 + 600 + 100 - 16;
+    const lane = 11;
+
+    const up = pairs.filter((q) => q.t.cy < q.s.cy).sort((a, b) => a.s.cy - b.s.cy);
+    const down = pairs.filter((q) => q.t.cy >= q.s.cy).sort((a, b) => a.s.cy - b.s.cy);
+    up.forEach((q, i) => { q.x = gutterLeft + i * lane; });
+    down.forEach((q, i) => { q.x = gutterRight - i * lane; });
+
+    pairs.forEach((q) => {
+        out += `<circle cx="${q.s.r + 4}" cy="${q.s.cy}" r="3" fill="var(--leader)"/>`;
+        out += line([[q.s.r + 4, q.s.cy], [q.x, q.s.cy], [q.x, q.t.cy], [q.t.l - 8, q.t.cy]], "var(--leader)", 1.1);
+    });
+
+    overlay.setAttribute("width", page.offsetWidth);
+    overlay.setAttribute("height", page.offsetHeight);
+    overlay.innerHTML = out;
+}
+
+document.fonts.ready.then(draw);
+window.addEventListener("resize", draw);
+</script>
+</body>
+</html>
