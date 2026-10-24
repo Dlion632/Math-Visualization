@@ -6,12 +6,12 @@
 //
 //   1. THE PROJECTS (projects/)        2. THE COORDINATE SYSTEM (core/)
 //      startProjects()                    startCoordinateSystem()
-//      chooseProject(name)                drawPaperBelow()
-//      updateProject(dt)                  drawPaperAbove()
+//      chooseProject(name)                drawViewportBelow()
+//      updateProject(dt)                  drawViewportAbove()
 //      drawProject()
 //
 // 3. Every frame weaves the two together, bottom to top:
-//      updateProject(dt) → drawPaperBelow() → drawProject() → drawPaperAbove()
+//      updateProject(dt) → drawViewportBelow() → drawProject() → drawViewportAbove()
 //
 // What goes inside a project's parts: see projects/project-template.js.
 
@@ -93,14 +93,14 @@ function startCoordinateSystem() {
     window.addEventListener("resize", resizeView);
 }
 
-// The paper under the drawing: an empty canvas with grid lines and axes.
-function drawPaperBelow() {
+// The viewport under the drawing: an empty canvas with grid lines and axes.
+function drawViewportBelow() {
     clearCanvas();
     drawGrid();
 }
 
 // The numbers on top, so a drawing never covers them.
-function drawPaperAbove() {
+function drawViewportAbove() {
     drawGridLabels();
 }
 
@@ -115,9 +115,9 @@ function frame(time) {
     lastTime = time;
 
     updateProject(dt);
-    drawPaperBelow();
+    drawViewportBelow();
     drawProject();
-    drawPaperAbove();
+    drawViewportAbove();
 
     requestAnimationFrame(frame);
 }
