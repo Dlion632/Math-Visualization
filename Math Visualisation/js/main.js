@@ -1,19 +1,19 @@
 "use strict";
 
-// main.js — runs the lifecycle.
+// main.js — runs the program.
 //
-// Every project has the same eight parts (see projects/project-template.js).
-// This file decides WHEN each one is called. A project never calls its own
-// lifecycle functions, never redraws, and never starts its own timer.
+// It looks after two things and keeps them apart:
 //
-//   WHEN                    WHAT IS CALLED
-//   page loads              setup()        every project, once
-//   a menu choice           leave()        the old project
-//                           enter()        the new project
-//   every frame (~60 / s)   update(dt)     the current project: change the state
-//                           clear → grid → draw() → grid numbers
-//   mouse pressed           grab(world)    the current project (from input.js)
-//   mouse moved             drag(world)    the current project (from input.js)
+//   1. THE PROJECTS (projects/)        2. THE COORDINATE SYSTEM (core/)
+//      startProjects()                    startCoordinateSystem()
+//      chooseProject(name)                drawPaperBelow()
+//      updateProject(dt)                  drawPaperAbove()
+//      drawProject()
+//
+// 3. Every frame weaves the two together, bottom to top:
+//      updateProject(dt) → drawPaperBelow() → drawProject() → drawPaperAbove()
+//
+// What goes inside a project's parts: see projects/project-template.js.
 
 import { setupView, resizeView, clearCanvas } from "./core/view.js";
 import { drawGrid, drawGridLabels } from "./core/grid.js";
@@ -21,16 +21,22 @@ import { setupInput } from "./core/input.js";
 import { coordinatesProject } from "./projects/coordinates.js";
 import { tinyStepsProject } from "./projects/tiny-steps.js";
 
-// ── The projects ──────────────────────────────────────────────
+// ══ 1. The projects ═══════════════════════════════════════════
+
 // Each key must match an <option value="..."> in index.html.
 const projects = {
     "coordinates": coordinatesProject,
     "tiny-steps": tinyStepsProject
 };
 
-// ── The contract ──────────────────────────────────────────────
 // Every project must have all of these, even if some are empty.
 const REQUIRED_FUNCTIONS = ["setup", "enter", "update", "draw", "leave", "grab", "drag"];
+
+let current = null;
+
+function currentProject() {
+    return current;
+}
 
 function checkProject(name, project) {
     const missing = REQUIRED_FUNCTIONS.filter((key) => typeof project[key] !== "function");
@@ -44,9 +50,18 @@ function checkProject(name, project) {
     }
 }
 
-// ── A menu choice ─────────────────────────────────────────────
-let current = null;
+// Page loads: check every project, set each one up once,
+// connect the menu, and show the project the menu starts on.
+function startProjects() {
+    for (const name in projects) checkProject(name, projects[name]);
+    for (const name in projects) projects[name].setup();
 
+    const select = document.getElementById("project-select");
+    select.addEventListener("change", () => chooseProject(select.value));
+    chooseProject(select.value);
+}
+
+// A menu choice: pause the old project, swap the panels, start the new one.
 function chooseProject(name) {
     if (current !== null) current.leave();
     current = projects[name];
@@ -60,7 +75,37 @@ function chooseProject(name) {
     current.enter();
 }
 
-// ── Every frame ───────────────────────────────────────────────
+function updateProject(dt) {
+    current.update(dt);
+}
+
+function drawProject() {
+    current.draw();
+}
+
+// ══ 2. The coordinate system ══════════════════════════════════
+
+// Page loads: size the canvas, connect the mouse, follow window resizes.
+function startCoordinateSystem() {
+    setupView(document.getElementById("canvas"));
+    resizeView();
+    setupInput(currentProject);
+    window.addEventListener("resize", resizeView);
+}
+
+// The paper under the drawing: an empty canvas with grid lines and axes.
+function drawPaperBelow() {
+    clearCanvas();
+    drawGrid();
+}
+
+// The numbers on top, so a drawing never covers them.
+function drawPaperAbove() {
+    drawGridLabels();
+}
+
+// ══ 3. Every frame ════════════════════════════════════════════
+
 let lastTime = null;
 
 function frame(time) {
@@ -69,29 +114,16 @@ function frame(time) {
     const dt = lastTime === null ? 0 : Math.min((time - lastTime) / 1000, 0.1);
     lastTime = time;
 
-    current.update(dt);
-
-    clearCanvas();
-    drawGrid();
-    current.draw();
-    drawGridLabels();
+    updateProject(dt);
+    drawPaperBelow();
+    drawProject();
+    drawPaperAbove();
 
     requestAnimationFrame(frame);
 }
 
-// ── Page loads ────────────────────────────────────────────────
-for (const name in projects) checkProject(name, projects[name]);
+// ══ Start ═════════════════════════════════════════════════════
 
-setupView(document.getElementById("canvas"));
-resizeView();
-setupInput(() => current);
-
-for (const name in projects) projects[name].setup();
-
-const select = document.getElementById("project-select");
-select.addEventListener("change", () => chooseProject(select.value));
-chooseProject(select.value);
-
-window.addEventListener("resize", resizeView);
-
+startProjects();
+startCoordinateSystem();
 requestAnimationFrame(frame);
