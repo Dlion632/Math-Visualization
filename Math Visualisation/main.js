@@ -516,9 +516,11 @@ const VectorApp = {
             if (this.state.pointerId !== ev.pointerId) return;
             if (!this.state.draggingPoint && !this.state.draggingPan) return;
 
-            const last = this.state.lastPointer;
-            const dxClient = ev.clientX - last.x;
-            const dyClient = ev.clientY - last.y;
+            const previousPointer = this.state.lastPointer;
+
+            // 1. how far the pointer moved since the previous event, in CSS px (canvas y grows downward)
+            const pointerMoveX = ev.clientX - previousPointer.x;
+            const pointerMoveY = ev.clientY - previousPointer.y;
             this.state.lastPointer = { x: ev.clientX, y: ev.clientY };
 
             if (this.state.draggingPoint) {
@@ -528,12 +530,18 @@ const VectorApp = {
                 this.state.point.y = world.y;
                 this.draw();
             } else if (this.state.draggingPan) {
-                // pan viewport center by negative delta in world coordinates
-                // dxClient is CSS px; convert to world units by dividing by scale
-                const cssDx = dxClient;
-                const cssDy = dyClient;
-                this.viewport.center.x -= cssDx / this.viewport.scale;
-                this.viewport.center.y += cssDy / this.viewport.scale;
+                // 2. the same movement in world units (world y grows upward, so y flips)
+                const worldMoveX = pointerMoveX / this.viewport.scale;
+                const worldMoveY = -pointerMoveY / this.viewport.scale;
+
+                // 3. the camera moves the opposite way, so the world appears to follow the pointer
+                const cameraMoveX = -worldMoveX;
+                const cameraMoveY = -worldMoveY;
+
+                // 4. new camera = old camera + camera move
+                this.viewport.center.x = this.viewport.center.x + cameraMoveX;
+                this.viewport.center.y = this.viewport.center.y + cameraMoveY;
+
                 this.draw();
             }
         });
