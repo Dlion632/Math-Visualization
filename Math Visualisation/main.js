@@ -564,31 +564,39 @@ const VectorApp = {
 
         // wheel zoom (zoom centered on cursor)
         canvas.addEventListener("wheel", (ev) => {
+            // stop the browser from scrolling the page (needs { passive: false } below)
             ev.preventDefault();
 
-            const zoomIntensity = 0.0018; // tweak for comfortable zoom speed
-            // wheel deltaY: positive = scroll down (zoom out), negative = zoom in
-            const wheel = ev.deltaY;
-            const factor = Math.exp(-wheel * zoomIntensity);
+            // 1. turn the wheel movement into a zoom factor:
+            //    every pixel scrolled up multiplies the scale by zoomPerPixel, every pixel down divides by it
+            //    (ev.deltaY: positive = scroll down, negative = scroll up, about ±100 per mouse notch)
+            const zoomPerPixel = 1.0018;
+            const zoomFactor = Math.pow(zoomPerPixel, -ev.deltaY);
 
+            // 2. where the pointer is on the canvas, in CSS px
             const rect = canvas.getBoundingClientRect();
-            const cssX = ev.clientX - rect.left;
-            const cssY = ev.clientY - rect.top;
+            const pointerX = ev.clientX - rect.left;
+            const pointerY = ev.clientY - rect.top;
 
-            // world coordinate under cursor before zoom
-            const before = this.screenToWorld({ x: cssX, y: cssY });
+            // 3. the world point at the pointer, converted with the OLD scale
+            const worldPointOldScale = this.screenToWorld({ x: pointerX, y: pointerY });
 
-            // apply scale clamp
-            const minScale = 0.02; // smallest CSS px per world unit
-            const maxScale = 200;  // largest
-            this.viewport.scale = Math.max(minScale, Math.min(maxScale, this.viewport.scale * factor));
+            // 4. new scale, kept between the limits
+            const minScale = 0.02;
+            const maxScale = 200;
+            const newScale = this.viewport.scale * zoomFactor;
+            this.viewport.scale = Math.max(minScale, Math.min(maxScale, newScale));
 
-            // world coordinate under cursor after zoom should be same -> update center
-            const after = this.screenToWorld({ x: cssX, y: cssY });
+            // 5. the same pointer converted again: screenToWorld now uses the NEW scale (camera not moved yet)
+            const worldPointNewScale = this.screenToWorld({ x: pointerX, y: pointerY });
 
-            // shift center by (before - after)
-            this.viewport.center.x += (before.x - after.x);
-            this.viewport.center.y += (before.y - after.y);
+            // 6. camera move that makes the pointer show worldPointOldScale again (old − new)
+            const cameraMoveX = worldPointOldScale.x - worldPointNewScale.x;
+            const cameraMoveY = worldPointOldScale.y - worldPointNewScale.y;
+
+            // 7. new camera = old camera + camera move
+            this.viewport.center.x = this.viewport.center.x + cameraMoveX;
+            this.viewport.center.y = this.viewport.center.y + cameraMoveY;
 
             this.draw();
         }, { passive: false });
