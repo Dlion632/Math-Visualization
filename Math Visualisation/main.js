@@ -567,9 +567,10 @@ const VectorApp = {
             // stop the browser from scrolling the page (needs { passive: false } below)
             ev.preventDefault();
 
-            // 1. turn the wheel movement into a zoom factor:
-            //    every pixel scrolled up multiplies the scale by zoomPerPixel, every pixel down divides by it
-            //    (ev.deltaY: positive = scroll down, negative = scroll up, about ±100 per mouse notch)
+            // 1. turn the wheel movement into a zoom factor
+            //    ev.deltaY: pixels scrolled in this event (negative = up, positive = down, about ±100 per mouse notch)
+            //    every pixel up multiplies the scale by zoomPerPixel once, every pixel down divides by it once:
+            //    n pixels up = zoomPerPixel multiplied n times = zoomPerPixel^n, n pixels down = zoomPerPixel^-n
             const zoomPerPixel = 1.0018;
             const zoomFactor = Math.pow(zoomPerPixel, -ev.deltaY);
 
